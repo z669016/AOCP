@@ -1,5 +1,8 @@
 Revision history for AOC
 
+0.02    2022/07/27
+        Added feature to load JSON data rom a file.
 0.01    Date/time
         First version, released on an unsuspecting world.
+
 

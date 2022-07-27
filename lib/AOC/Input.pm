@@ -8,6 +8,8 @@ use feature qw/fc/;
 
 use File::Basename;
 use Text::CSV;
+use JSON 'decode_json';
+
 use Readonly;
 
 =head1 NAME
@@ -20,17 +22,17 @@ Version 0.01
 
 =cut
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 Readonly my $TXT => ".txt";
 Readonly my $CSV => ".csv";
 Readonly my $REG => ".reg";
-Readonly my @SUPPORTED_TYPES => ($TXT, $CSV, $REG);
+Readonly my $JSON => ".json";
+Readonly my @SUPPORTED_TYPES => ($TXT, $CSV, $REG, $JSON);
 
 Readonly my $SLICE => "slice";
 Readonly my $REGEXP => "regexp";
 Readonly my $SEP_CHAR => "sep_char";
-
 
 =head1 SYNOPSIS
 
@@ -57,6 +59,7 @@ contains a single element, that element will be returned as a scalar:
 =item * ".txt" lines will not be processed, just copied into the array.
 =item * ".csv" lines will be split at the comma, and each entry will be an array reference of the split line.
 =item * ".reg" lines will be matched against a regexp, each entry will be the match result (e.g. matched groups).
+=item * ".json" will return the parsed JSON
 =back
 
 =head1 SUBROUTINES/METHODS
@@ -105,6 +108,9 @@ sub load {
     }
     elsif (is_reg($path)) {
         $data = load_reg($fh, $options);
+    }
+    elsif (is_json($path)) {
+        $data = load_json($fh, $options);
     }
     else {
         die "Unknown input file type for '$path'";
@@ -200,6 +206,11 @@ sub is_reg {
     cmp_ext($path, $REG);
 }
 
+sub is_json {
+    my $path = shift;
+    cmp_ext($path, $JSON);
+}
+
 sub load_text {
     my $fh = shift;
     chomp(my @data = <$fh>);
@@ -241,6 +252,12 @@ sub load_reg {
     return $data;
 }
 
+sub load_json {
+    my ($fh, $options) = @_;
 
+    local $/ = undef;
+    my $json_str = <$fh>;
+    decode_json( $json_str );
+}
 
 1; # End of AOC::Input
