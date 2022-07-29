@@ -38,5 +38,7 @@ is_deeply (${AOC::Input::load("./t/t.reg", { regexp => $reg, slice => [ 2 ] })},
 my $json = AOC::Input::load("./t/t.json");
 is($json->{'glossary'}{'title'}, 'example glossary', "data loaded from json file");
 
+is_deeply (AOC::Input::load("./t/t.txt", {"map" => sub {s/,/-/g; $_}}), ["1-2-3","4-5-6","7-8-9"], "Data loaded from csv file");
+
 done_testing();
 

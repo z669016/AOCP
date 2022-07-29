@@ -18,11 +18,11 @@ AOC::Input - The great new AOC::Input!
 
 =head1 VERSION
 
-Version 0.01
+Version 0.03
 
 =cut
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 Readonly my $TXT => ".txt";
 Readonly my $CSV => ".csv";
@@ -31,6 +31,7 @@ Readonly my $JSON => ".json";
 Readonly my @SUPPORTED_TYPES => ($TXT, $CSV, $REG, $JSON);
 
 Readonly my $SLICE => "slice";
+Readonly my $MAP => "map";
 Readonly my $REGEXP => "regexp";
 Readonly my $SEP_CHAR => "sep_char";
 
@@ -73,7 +74,8 @@ Specific options and generic options may be combined. Irrelevant options for the
 
 Generic options:
 =over 4
-=item * slice => [<slice>]: return only a slice of the data (e.g. {slice => [0]} toreturn only the first line)
+=item * slice => [<slice>]: return only a slice of the data (e.g. {slice => [0]} to return only the first line)
+=item * map => &$mapper: apply the mapper on all elements of the result
 =back
 
 CSV options:
@@ -116,6 +118,12 @@ sub load {
         die "Unknown input file type for '$path'";
     }
     close $fh;
+
+    my $map = $$options{$MAP};
+    if (defined($map)) {
+        my @data = map { &$map($_) } @$data;
+        $data = \@data;
+    }
 
     my $slice = $$options{$SLICE};
     if (defined $slice) {

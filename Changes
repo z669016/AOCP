@@ -1,5 +1,7 @@
 Revision history for AOC
 
+0.02    2022/07/29
+        Added 'map' option to map result array.
 0.02    2022/07/27
         Added feature to load JSON data rom a file.
 0.01    Date/time
