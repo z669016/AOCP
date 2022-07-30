@@ -18,7 +18,7 @@ AOC::Input - The great new AOC::Input!
 
 =head1 VERSION
 
-Version 0.03
+Version 0.04
 
 =cut
 
@@ -34,6 +34,7 @@ Readonly my $SLICE => "slice";
 Readonly my $MAP => "map";
 Readonly my $REGEXP => "regexp";
 Readonly my $SEP_CHAR => "sep_char";
+Readonly my $SORTED => "sort";
 
 =head1 SYNOPSIS
 
@@ -72,10 +73,11 @@ $options must be a hash reference if provided. Some options are specific for a f
 
 Specific options and generic options may be combined. Irrelevant options for the file type being parsed will be ignored.
 
-Generic options:
+Generic options (will be ignored on json input files):
 =over 4
 =item * slice => [<slice>]: return only a slice of the data (e.g. {slice => [0]} to return only the first line)
 =item * map => &$mapper: apply the mapper on all elements of the result
+=item * sorted => <true value> | <sub routine ref taking 2 parameters to compare> return the sorted list
 =back
 
 CSV options:
@@ -95,7 +97,7 @@ sub load {
     $options //= {};
 
     if (ref $options eq ref qr//) {
-        $options = {$REGEXP => $options};
+        $options = { $REGEXP => $options };
     }
 
     must_exist($path);
@@ -119,23 +121,31 @@ sub load {
     }
     close $fh;
 
+    my $slice = $$options{$SLICE};
+    if (defined $slice) {
+        $data = [ (@$data)[@$slice] ];
+    }
+
+    return $data if is_json($path);
+
     my $map = $$options{$MAP};
     if (defined($map)) {
-        my @data = map { &$map($_) } @$data;
+        my @data = map {&$map($_)} @$data;
         $data = \@data;
     }
 
-    my $slice = $$options{$SLICE};
-    if (defined $slice) {
-        if (@$slice == 1) {
-            return \(@$data)[@$slice];
+    my $sorted = $$options{$SORTED};
+    if (defined($sorted)) {
+        my @data;
+        if (ref $sorted eq ref sub {}) {
+            @data = sort {&$sorted($a,$b)} @$data;
+        } else {
+            @data = sort @$data;
         }
-        else {
-            return [ (@$data)[@$slice] ];
-        }
+        $data = \@data;
     }
 
-    $data;
+    @$data > 1 ? $data : $data->[0];
 }
 
 =head1 AUTHOR
@@ -265,7 +275,7 @@ sub load_json {
 
     local $/ = undef;
     my $json_str = <$fh>;
-    decode_json( $json_str );
+    decode_json($json_str);
 }
 
 1; # End of AOC::Input

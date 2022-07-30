@@ -1,6 +1,8 @@
 Revision history for AOC
 
-0.02    2022/07/29
+0.04    2022/07/30
+        Added 'sort' option return a sorted result.
+0.03    2022/07/29
         Added 'map' option to map result array.
 0.02    2022/07/27
         Added feature to load JSON data rom a file.
